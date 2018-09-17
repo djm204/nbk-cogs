@@ -404,6 +404,34 @@ class Race:
 
         return racers
 
+    @race.command(name="bet", pass_context=True)
+    async def _enter_race(self, ctx, betAmount: int):
+        """Place a bet on the current race - 1 bet per player.
+
+        Returns:
+            Text informing the user that they have placed a bet on themselves.
+
+        Notes:
+            Users can only place 1 bet, 
+            They are only entitled to the amount the place (if other enter at higher value)
+            If Player does not bet, they are not entitled to anything.
+        """
+        author = ctx.message.author
+        data = self.check_server(author.server)
+
+        if data['Race Start']:
+            return
+        elif not data['Race Active']:
+            return
+        elif author.id in data['Bets']:
+            return
+        elif len(data['Bets']) == 8:
+            return
+        else:
+            data['Bets'][author.id] = betAmount
+            await self.bot.say("**{}** Placed a bet!".format(betAmount))
+
+
     async def run_game(self, racers, game, data):
         while True:
             await asyncio.sleep(2.0)
